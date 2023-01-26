@@ -11,7 +11,8 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Modèle de départ"
 
-COLORS = [arcade.color.ROCKET_METALLIC, arcade.color.DARK_BROWN, arcade.color.DARK_GREEN]
+COLORS = [arcade.color.ROCKET_METALLIC, arcade.color.DARK_BROWN, arcade.color.DARK_GREEN,
+          arcade.color.RED, arcade.color.YELLOW, arcade.color.BAKER_MILLER_PINK, arcade.color.SKY_BLUE]
 
 CIRCLE = 0
 SQUARE = 1
@@ -24,6 +25,7 @@ ELLIPSE = 6
 SHAPES = [CIRCLE, SQUARE, TRIANGLE, ARC, LINE, POLYGON, ELLIPSE]
 SHAPE_NUMBER_KEY = [arcade.key.KEY_1, arcade.key.KEY_2, arcade.key.KEY_3,
                     arcade.key.KEY_4, arcade.key.KEY_5, arcade.key.KEY_6, arcade.key.KEY_7]
+SHAPE_COLORS_KEY = SHAPE_NUMBER_KEY
 
 
 class DessinMagnifique(arcade.Window):
@@ -43,6 +45,7 @@ class DessinMagnifique(arcade.Window):
         self.mouse_color = COLORS[0]
         self.mouse_size = 1
         self.shape = CIRCLE
+        self.mouse_alpha = 1
 
     def setup(self):
         """
@@ -70,7 +73,6 @@ class DessinMagnifique(arcade.Window):
             shape = arcade.SpriteSolidColor(round(SCREEN_WIDTH // 25 * self.mouse_size),
                                             round(SCREEN_WIDTH // 25 * self.mouse_size), self.mouse_color)
             shape.position = x, y
-
         return shape
 
     def on_draw(self):
@@ -85,8 +87,8 @@ class DessinMagnifique(arcade.Window):
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
                                      SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
 
-        self.get_current_shape(self.mouse_position[0], self.mouse_position[1]).draw()
         self.dessin_custom.draw()
+        self.get_current_shape(self.mouse_position[0], self.mouse_position[1]).draw()
 
     def on_update(self, delta_time):
         """
@@ -107,9 +109,15 @@ class DessinMagnifique(arcade.Window):
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
         """
 
-        if key in SHAPE_NUMBER_KEY:
-            self.shape = SHAPES[SHAPE_NUMBER_KEY.index(key)]
-        elif key == arcade.key.R:
+        if key_modifiers & arcade.key.LSHIFT:
+            if key in SHAPE_COLORS_KEY:
+                self.mouse_color = COLORS[SHAPE_COLORS_KEY.index(key)]
+
+        else:
+            if key in SHAPE_NUMBER_KEY:
+                self.shape = SHAPES[SHAPE_NUMBER_KEY.index(key)]
+
+        if key == arcade.key.R:
             self.dessin_custom = arcade.SpriteList()
 
     def on_key_release(self, key, key_modifiers):
@@ -156,7 +164,9 @@ class DessinMagnifique(arcade.Window):
         self.mouse_position = x, y
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        self.mouse_size *= (1.3 if scroll_y == -1 else 0.8)
+        multiplier = (1.3 if scroll_y == -1 else 0.8)
+
+        self.mouse_size *= multiplier
         self.mouse_size = min(max(self.mouse_size, 0.1), 10)
 
 
