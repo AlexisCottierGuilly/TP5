@@ -45,12 +45,14 @@ class DessinMagnifique(arcade.Window):
         self.mouse_color = COLORS[0]
         self.mouse_size = 1
         self.shape = CIRCLE
-        self.mouse_alpha = 1
+        self.mouse_alpha = 255
+        self.mouse_middle_click = False
+        self.shift_pressed = False
 
     def setup(self):
         """
         Configurer les variables de votre jeu ici. Il faut appeler la méthode une nouvelle
-        fois si vous recommencer une nouvelle partie.
+        fois si vous recommencez une nouvelle partie.
         """
         # C'est ici que vous allez créer vos listes de sprites et vos sprites.
         # C'est aussi ici que vous chargez les sons de votre jeu.
@@ -73,6 +75,9 @@ class DessinMagnifique(arcade.Window):
             shape = arcade.SpriteSolidColor(round(SCREEN_WIDTH // 25 * self.mouse_size),
                                             round(SCREEN_WIDTH // 25 * self.mouse_size), self.mouse_color)
             shape.position = x, y
+
+        shape.alpha = self.mouse_alpha
+
         return shape
 
     def on_draw(self):
@@ -109,6 +114,9 @@ class DessinMagnifique(arcade.Window):
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
         """
 
+        if key == arcade.key.LSHIFT:
+            self.shift_pressed = True
+
         if key_modifiers & arcade.key.LSHIFT:
             if key in SHAPE_COLORS_KEY:
                 self.mouse_color = COLORS[SHAPE_COLORS_KEY.index(key)]
@@ -127,7 +135,8 @@ class DessinMagnifique(arcade.Window):
             - key: la touche relâchée
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
         """
-        pass
+        if key == arcade.key.LSHIFT:
+            self.shift_pressed = False
 
     def on_mouse_motion(self, x, y, delta_x, delta_y):
         """
@@ -148,9 +157,13 @@ class DessinMagnifique(arcade.Window):
             - button : le bouton de la souris appuyé
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
         """
-        self.mouse_pressed = True
-        self.mouse_position = x, y
-        self.dessin_custom.append(self.get_current_shape(self.mouse_position[0], self.mouse_position[1]))
+
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_pressed = True
+            self.mouse_position = x, y
+            self.dessin_custom.append(self.get_current_shape(self.mouse_position[0], self.mouse_position[1]))
+        elif button == arcade.MOUSE_BUTTON_MIDDLE:
+            self.mouse_middle_click = True
 
     def on_mouse_release(self, x, y, button, key_modifiers):
         """
@@ -160,14 +173,22 @@ class DessinMagnifique(arcade.Window):
             - button : le bouton de la souris relâché
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
         """
-        self.mouse_pressed = False
-        self.mouse_position = x, y
+
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_pressed = False
+            self.mouse_position = x, y
+        elif button == arcade.MOUSE_BUTTON_MIDDLE:
+            self.mouse_middle_click = False
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        multiplier = (1.3 if scroll_y == -1 else 0.8)
+        multiplier = 0.8 if scroll_y == -1 else 1.3
 
-        self.mouse_size *= multiplier
-        self.mouse_size = min(max(self.mouse_size, 0.1), 10)
+        if self.shift_pressed:
+            self.mouse_alpha *= multiplier
+            self.mouse_alpha = min(max(self.mouse_alpha, 0.01), 255)
+        else:
+            self.mouse_size *= multiplier
+            self.mouse_size = min(max(self.mouse_size, 0.1), 10)
 
 
 def main():
