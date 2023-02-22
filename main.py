@@ -4,6 +4,7 @@ Fait le 18 janvier 2023
 Ce programme teste les dessins avec arcade en dessinant quelque chose
 que l'on peut reconnaitre avec différentes formes
 """
+import random
 
 import arcade
 
@@ -48,6 +49,8 @@ class DessinMagnifique(arcade.Window):
         self.mouse_alpha = 255
         self.mouse_middle_click = False
         self.shift_pressed = False
+        self.map_seed = 1
+        self.load_new_terrain()
 
     def setup(self):
         """
@@ -80,6 +83,41 @@ class DessinMagnifique(arcade.Window):
 
         return shape
 
+    def load_new_terrain(self):
+        self.map_seed = random.randint(1, 1_000_000_000_000_000)
+
+    def draw_tree(self, position, size):
+        arcade.draw_rectangle_filled(position[0], position[1], size[0], size[1], arcade.color.WOOD_BROWN)
+        arcade.draw_ellipse_filled(position[0], position[1] + size[1] / 1.2, size[0] * random.uniform(2, 3),
+                                   size[1] * random.uniform(1.5, 2.5), arcade.color.DARK_GREEN)
+
+    def draw_rock(self, position, size):
+        arcade.draw_circle_filled(position[0], position[1], size[0] / 2.5, num_segments=random.randint(5, 8), color=arcade.color.COOL_GREY)
+    def get_object_setup(self):
+        position = random.uniform(0, SCREEN_WIDTH), random.uniform(0, SCREEN_HEIGHT / 3)
+        size = random.uniform(SCREEN_WIDTH / 50, SCREEN_WIDTH / 25), random.uniform(SCREEN_HEIGHT / 35,
+                                                                                    SCREEN_HEIGHT / 15)
+        return position, size
+    def draw_background(self):
+        arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
+                                     SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
+        random.seed(self.map_seed)
+        for i in range(random.randint(3, 5)):
+            self.draw_rock(*self.get_object_setup())
+
+        for i in range(random.randint(5, 20)):
+            self.draw_tree(*self.get_object_setup())
+
+        nom_foret = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(random.randint(3, 7))]).capitalize()
+        arcade.draw_text(f'La forêt de {nom_foret}', 0, round(SCREEN_HEIGHT / 3 * 2),
+                         arcade.color.MIDNIGHT_BLUE, width=SCREEN_WIDTH, bold=True,
+                         font_size=round(SCREEN_WIDTH / 15), align='center', font_name='Garamond')
+        arcade.draw_text(f'Seed de génération : {self.map_seed}', 0, round(SCREEN_HEIGHT / 3 * 1.8),
+                         arcade.color.MIDNIGHT_BLUE, width=SCREEN_WIDTH,
+                         font_size=round(SCREEN_WIDTH / 75), align='center')
+
+        random.seed()
+
     def on_draw(self):
         """
         C'est la méthode qu'Arcade invoque à chaque "frame" pour afficher les éléments
@@ -89,9 +127,7 @@ class DessinMagnifique(arcade.Window):
         # Cette commande permet d'effacer l'écran avant de dessiner. Elle va dessiner l'arrière-plan
         # selon la couleur spécifiée avec la méthode "set_background_color".
         arcade.start_render()
-        arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
-                                     SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
-
+        self.draw_background()
         self.dessin_custom.draw()
         self.get_current_shape(self.mouse_position[0], self.mouse_position[1]).draw()
 
@@ -120,6 +156,9 @@ class DessinMagnifique(arcade.Window):
         if key_modifiers & arcade.key.LSHIFT:
             if key in SHAPE_COLORS_KEY:
                 self.mouse_color = COLORS[SHAPE_COLORS_KEY.index(key)]
+
+        elif key == arcade.key.ENTER:
+            self.load_new_terrain()
 
         else:
             if key in SHAPE_NUMBER_KEY:
@@ -185,7 +224,7 @@ class DessinMagnifique(arcade.Window):
 
         if self.shift_pressed:
             self.mouse_alpha *= multiplier
-            self.mouse_alpha = min(max(self.mouse_alpha, 0.01), 255)
+            self.mouse_alpha = min(max(self.mouse_alpha, 1), 255)
         else:
             self.mouse_size *= multiplier
             self.mouse_size = min(max(self.mouse_size, 0.1), 10)
