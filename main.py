@@ -4,6 +4,7 @@ Fait le 18 janvier 2023
 Ce programme teste les dessins avec arcade en dessinant quelque chose
 que l'on peut reconnaitre avec différentes formes
 """
+
 import math
 import random
 
@@ -82,30 +83,61 @@ class DessinMagnifique(arcade.Window):
         return shape
 
     def load_new_terrain(self):
+        """
+        Changement de la graine de génération
+        pour générer un nouveau terrain
+        """
         self.map_seed = random.randint(1, 1_000_000_000_000_000)
 
     @staticmethod
     def draw_tree(position, size):
+        """
+        Dessiner un arbre a une position
+        précise avec une certaine taille
+        :param position: position de l'arbre
+        :param size: taille de l'arbre
+        """
         arcade.draw_rectangle_filled(position[0], position[1], size[0], size[1], arcade.color.WOOD_BROWN)
         arcade.draw_ellipse_filled(position[0], position[1] + size[1] / 1.2, size[0] * random.uniform(2, 3),
                                    size[1] * random.uniform(1.5, 2.5), arcade.color.DARK_GREEN)
 
     @staticmethod
     def draw_rock(position, size):
+        """
+        Dessiner une roche en forme de polygone a une position
+        précise avec une certaine taille
+        :param position: position de la roche
+        :param size: taille de la roche
+        """
         arcade.draw_circle_filled(position[0], position[1], size[0] / 2.5, num_segments=random.randint(5, 8), color=arcade.color.COOL_GREY)
 
     @staticmethod
     def draw_grass(position, size):
+        """
+        Dessiner de l'herbe en forme d'arc a une position
+        précise avec une certaine taille
+        :param position: position de l'arc
+        :param size: taille de l'arc
+        """
         arcade.draw_arc_outline(position[0], position[1], size[0] * 0.5, size[1] * 0.75, (0, 100, 0), 0, random.uniform(45, 130), SCREEN_WIDTH / 150)
 
     @staticmethod
     def get_object_setup():
+        """
+        Générer une nouvelle position et taille
+        pour le prochain objet à tracer
+        :return: la position et la taille de l'objet
+        """
         position = random.uniform(0, SCREEN_WIDTH), random.uniform(0, SCREEN_HEIGHT / 3)
         size = random.uniform(SCREEN_WIDTH / 50, SCREEN_WIDTH / 25), random.uniform(SCREEN_HEIGHT / 35,
                                                                                     SCREEN_HEIGHT / 15)
         return position, size
 
     def draw_background(self):
+        """
+        Dessiner l'arriere plan, avec des arbres, de
+        l'herbe et le soleil, ainsi que le texte
+        """
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
                                      SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
         random.seed(self.map_seed)
