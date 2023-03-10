@@ -7,11 +7,10 @@ que l'on peut reconnaitre avec différentes formes
 
 import math
 import random
-
 import arcade
 
-SCREEN_WIDTH = 800 * 2
-SCREEN_HEIGHT = 600 * 2
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Les forêts magnifiques"
 
 COLORS = [arcade.color.ROCKET_METALLIC, arcade.color.DARK_BROWN, arcade.color.DARK_GREEN,
@@ -30,7 +29,10 @@ SHAPE_COLORS_KEY = [arcade.key.KEY_1, arcade.key.KEY_2, arcade.key.KEY_3,
 
 class DessinMagnifique(arcade.Window):
     """
-    La classe principale de l'application
+    La classe principale de l'application affiche une forêt et
+    présente une interface simple pour faire des dessins avec
+    différentes couleurs, formes et transparence. On peut
+    aussi régénérer le terrain de l'arrière-plan.
 
     NOTE : Vous pouvez effacer les méthodes que vous n'avez pas besoin.
     Si vous en avez besoin, remplacer le mot clé "pass" par votre propre code.
@@ -109,7 +111,8 @@ class DessinMagnifique(arcade.Window):
         :param position: position de la roche
         :param size: taille de la roche
         """
-        arcade.draw_circle_filled(position[0], position[1], size[0] / 2.5, num_segments=random.randint(5, 8), color=arcade.color.COOL_GREY)
+        arcade.draw_circle_filled(position[0], position[1], size[0] / 2.5,
+                                  num_segments=random.randint(5, 8), color=arcade.color.COOL_GREY)
 
     @staticmethod
     def draw_grass(position, size):
@@ -119,7 +122,8 @@ class DessinMagnifique(arcade.Window):
         :param position: position de l'arc
         :param size: taille de l'arc
         """
-        arcade.draw_arc_outline(position[0], position[1], size[0] * 0.5, size[1] * 0.75, (0, 100, 0), 0, random.uniform(45, 130), SCREEN_WIDTH / 150)
+        arcade.draw_arc_outline(position[0], position[1], size[0] * 0.5,
+                                size[1] * 0.75, (0, 100, 0), 0, random.uniform(45, 130), SCREEN_WIDTH / 150)
 
     @staticmethod
     def get_object_setup():
@@ -136,18 +140,18 @@ class DessinMagnifique(arcade.Window):
     def draw_background(self):
         """
         Dessiner l'arriere plan, avec des arbres, de
-        l'herbe et le soleil, ainsi que le texte
+        l'herbe, des roches et le soleil, ainsi que le texte
         """
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
                                      SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
         random.seed(self.map_seed)
-        for i in range(random.randint(25, 150)):
+        for i in range(random.randint(50, 300)):
             self.draw_grass(*self.get_object_setup())
 
-        for i in range(random.randint(3, 5)):
+        for i in range(random.randint(5, 20)):
             self.draw_rock(*self.get_object_setup())
 
-        for i in range(random.randint(5, 20)):
+        for i in range(random.randint(5, 35)):
             self.draw_tree(*self.get_object_setup())
 
         sun_position = random.randint(round(SCREEN_WIDTH / 15), round(SCREEN_WIDTH / 15 * 14)), SCREEN_HEIGHT / 8 * 7
@@ -155,17 +159,19 @@ class DessinMagnifique(arcade.Window):
         arcade.draw_circle_filled(sun_position[0], sun_position[1], SCREEN_WIDTH / 20, arcade.color.SUNGLOW)
 
         number_of_radius = 10
+        # Dessiner les rayons du soleil
         for angle in range(number_of_radius):
-            # Dessiner les rayons du soleil
             angle = 360 / number_of_radius * (angle + 1)
             distance_from_center = SCREEN_WIDTH / 20
             start_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center, \
-                                sun_position[1] + math.sin(math.radians(angle)) * distance_from_center
+                sun_position[1] + math.sin(math.radians(angle)) * distance_from_center
             end_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center * 2, \
-                                sun_position[1] + math.sin(math.radians(angle)) * distance_from_center * 2
-            arcade.draw_line(start_position[0], start_position[1], end_position[0], end_position[1], arcade.color.SUNGLOW)
+                sun_position[1] + math.sin(math.radians(angle)) * distance_from_center * 2
+            arcade.draw_line(start_position[0], start_position[1], end_position[0],
+                             end_position[1], arcade.color.SUNGLOW)
 
-        nom_foret = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(random.randint(3, 7))]).capitalize()
+        nom_foret = ''.join(
+            [random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(random.randint(3, 7))]).capitalize()
         arcade.draw_text(f'La forêt de {nom_foret}', 0, round(SCREEN_HEIGHT / 3 * 2),
                          arcade.color.MIDNIGHT_BLUE, width=SCREEN_WIDTH, bold=True,
                          font_size=round(SCREEN_WIDTH / 15), align='center', font_name='Garamond')
@@ -201,7 +207,9 @@ class DessinMagnifique(arcade.Window):
     def on_key_press(self, key, key_modifiers):
         """
         Cette méthode est invoquée à chaque fois que l'usager tape une touche
-        sur le clavier.
+        sur le clavier. Cette méthode est utilisée pour prendre l'input de
+        l'utilisateur quand il veut changer la forêt, changer la forme, effacer son dessin ou
+        encore changer la transparence (en appuyant sur shift, puis en scrollant)
         Paramètres :
             - key: la touche enfoncée
             - key_modifiers : est-ce que l'usager appuie sur "shift" ou "ctrl" ?
@@ -243,11 +251,13 @@ class DessinMagnifique(arcade.Window):
         """
         self.mouse_position = x, y
         if self.mouse_pressed:
+            # Si la souris reste cliquée, elle va traver des formes en continu
             self.dessin_custom.append(self.get_current_shape(self.mouse_position[0], self.mouse_position[1]))
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """
         Méthode invoquée lorsque l'usager clique un bouton de la souris.
+        Placement d'une forme
         Paramètres:
             - x, y: coordonnées où le bouton a été cliqué
             - button : le bouton de la souris appuyé
@@ -277,9 +287,17 @@ class DessinMagnifique(arcade.Window):
             self.mouse_middle_click = False
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        """
+        Fonction appelée que l'utilisateur "scroll" avec le bouton du milieu de la souris.
+        Paramètres :
+            - x : position du scroll en x
+            - y : position du scroll en y
+            - scroll_x : nombre de pixels scroll depuis de dernier appel en x
+            - scroll_y : nombre de pixels scroll depuis de dernier appel en y
+        """
         multiplier = 0.8 if scroll_y == -1 else 1.3
 
-        if self.shift_pressed:
+        if self.shift_pressed or self.mouse_middle_click:
             self.mouse_alpha *= multiplier
             self.mouse_alpha = min(max(self.mouse_alpha, 1), 255)
         else:
