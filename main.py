@@ -92,6 +92,40 @@ class DessinMagnifique(arcade.Window):
         self.map_seed = random.randint(1, 1_000_000_000_000_000)
 
     @staticmethod
+    def draw_lodge(position, size):
+        """
+        Dessiner un lodge a une position
+        précise avec une certaine taille
+        :param position: position du lodge
+        :param size: taille du lodge
+        """
+
+        main_rectangle_position = position[0], position[1] - size[1] / 6
+        main_rectangle_size = size[0], size[1] / 3 * 2
+
+        # Dessiner le rectangle principal
+        arcade.draw_rectangle_filled(main_rectangle_position[0], main_rectangle_position[1],
+                                     main_rectangle_size[0], main_rectangle_size[1], arcade.color.DARK_BROWN)
+
+        # Dessiner le toit
+        point1 = main_rectangle_position[0] - main_rectangle_size[0] / 2,\
+            main_rectangle_position[1] + main_rectangle_size[1] / 2
+        point2 = main_rectangle_position[0] + main_rectangle_size[0] / 2, point1[1]
+        point3 = main_rectangle_position[0], main_rectangle_position[1] + main_rectangle_size[1] / 2 + size[1] / 6
+        arcade.draw_triangle_filled(*point1, *point2, *point3, arcade.color.BROWN)
+
+        # Dessiner la porte
+        point1 = main_rectangle_position[0] + main_rectangle_size[0] / 5,\
+            main_rectangle_position[1] - main_rectangle_size[1] / 2
+        point2 = main_rectangle_position[0], point1[1]
+        point3 = main_rectangle_position[0] + main_rectangle_size[0] / 18,\
+            main_rectangle_position[1] - main_rectangle_size[1] / 5
+        point4 = main_rectangle_position[0] + main_rectangle_size[0] / 5,\
+            main_rectangle_position[1] - main_rectangle_size[1] / 4
+        points = [point1, point2, point3, point4]
+        arcade.draw_polygon_filled(points, arcade.color.COCOA_BROWN)
+
+    @staticmethod
     def draw_tree(position, size):
         """
         Dessiner un arbre a une position
@@ -145,11 +179,18 @@ class DessinMagnifique(arcade.Window):
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 6,
                                      SCREEN_WIDTH, SCREEN_HEIGHT / 3, arcade.color.ARMY_GREEN)
         random.seed(self.map_seed)
+
         for i in range(random.randint(50, 300)):
             self.draw_grass(*self.get_object_setup())
 
         for i in range(random.randint(5, 20)):
             self.draw_rock(*self.get_object_setup())
+
+        lodge_size =  self.get_object_setup()[1]
+        lodge_size = lodge_size[0] * 4.5, lodge_size[0] * 4.5
+        lodge_position = random.uniform(lodge_size[0] / 2, SCREEN_WIDTH - lodge_size[0] / 2),\
+            random.uniform(lodge_size[1] / 2, SCREEN_HEIGHT / 3)
+        self.draw_lodge(lodge_position, lodge_size)
 
         for i in range(random.randint(5, 35)):
             self.draw_tree(*self.get_object_setup())
@@ -163,9 +204,9 @@ class DessinMagnifique(arcade.Window):
         for angle in range(number_of_radius):
             angle = 360 / number_of_radius * (angle + 1)
             distance_from_center = SCREEN_WIDTH / 20
-            start_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center, \
+            start_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center,\
                 sun_position[1] + math.sin(math.radians(angle)) * distance_from_center
-            end_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center * 2, \
+            end_position = sun_position[0] + math.cos(math.radians(angle)) * distance_from_center * 2,\
                 sun_position[1] + math.sin(math.radians(angle)) * distance_from_center * 2
             arcade.draw_line(start_position[0], start_position[1], end_position[0],
                              end_position[1], arcade.color.SUNGLOW)
