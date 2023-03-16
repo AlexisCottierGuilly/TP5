@@ -2,7 +2,10 @@
 Fait par Alexis Cottier-Guilly
 Fait le 18 janvier 2023
 Ce programme teste les dessins avec arcade en dessinant quelque chose
-que l'on peut reconnaitre avec différentes formes
+que l'on peut reconnaitre avec différentes formes.
+Le programme présente aussi une interface de dessin avec
+plusieurs formes et couleurs, ainsi que la possibilité de changer
+l'opacité et la taille de ces dernieres.
 """
 
 import math
